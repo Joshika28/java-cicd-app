@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.vscode
+ansible/
+k8s/
+src/
+.mvn/
+mvnw
+mvnw.cmd
+pom.xml
+README.md
+*.log
+*.tmp
+target/*
+!target/java-cicd-app-0.0.1-SNAPSHOT.jar

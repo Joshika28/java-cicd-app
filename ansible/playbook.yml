@@ -1,0 +1,38 @@
+---
+- name: Deploy Spring Boot application to Azure Kubernetes
+  hosts: k3s_vm
+  become: true
+
+  tasks:
+    - name: Copy Kubernetes manifests to Azure VM
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../k8s/"
+        dest: /home/azureuser/k8s/
+        owner: azureuser
+        group: azureuser
+        mode: "0644"
+
+    - name: Apply Kubernetes manifests
+      ansible.builtin.command:
+        cmd: kubectl apply -f /home/azureuser/k8s/
+      register: apply_result
+      changed_when: "'configured' in apply_result.stdout or 'created' in apply_result.stdout"
+
+    - name: Display Kubernetes apply result
+      ansible.builtin.debug:
+        var: apply_result.stdout_lines
+
+    - name: Verify application rollout
+      ansible.builtin.command:
+        cmd: kubectl rollout status deployment/java-cicd-app --timeout=180s
+      changed_when: false
+
+    - name: Check Kubernetes nodes
+      ansible.builtin.command:
+        cmd: kubectl get nodes
+      register: node_result
+      changed_when: false
+
+    - name: Display Kubernetes node status
+      ansible.builtin.debug:
+        var: node_result.stdout_lines
